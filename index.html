@@ -114,7 +114,7 @@ tr:hover td{background:var(--bg3)}
     <input type="password" id="pIn" placeholder="Contraseña">
     <button class="btn-login" onclick="doLogin()">Ingresar</button>
     <div class="lerr" id="lerr"></div>
-    <div class="lu"><span>admin</span> / admin123<br><span>tecnico</span> / tec123</div>
+    <div class="lu"><span>admin</span> &nbsp;/&nbsp; <span>tecnico</span></div>
   </div>
 </div>
 
@@ -241,7 +241,7 @@ tr:hover td{background:var(--bg3)}
 // ══════════════════════════════════════════════════
 // ⚙️  CONFIGURACIÓN — PEGA AQUÍ TU URL DE GOOGLE
 // ══════════════════════════════════════════════════
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw9ofwVgxNaItLpq-F1VVczJRi1zLzkYRdkBIQsEQ-sh5TYKHWrhubdjlpR0D-wtxS9Zw/exec';
+const APPS_SCRIPT_URL = 'PEGA_AQUI_TU_URL_DE_APPS_SCRIPT';
 // Ejemplo:
 // const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfyc.../exec';
 
@@ -269,7 +269,7 @@ let records = [];
 // BOOT
 // ══════════════════════════════════════════════════
 window.onload = async () => {
-  const configured = APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbwHgMvlc7j0BdQY4Ode_H5fcolU0tsvrWAlnWf05tPdEAj1KJT0_eHD0puV1jIR-dJC/exec';
+  const configured = APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'PEGA_AQUI_TU_URL_DE_APPS_SCRIPT';
   if (!configured) {
     setOverlay(false);
     document.getElementById('loginScreen').style.display = 'flex';
@@ -349,7 +349,7 @@ function doLogin() {
     document.getElementById('app').style.display = 'block';
     document.getElementById('uBadge').textContent = user.role.toUpperCase();
     document.getElementById('uName').textContent  = user.name;
-    const cfgOk = APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbwHgMvlc7j0BdQY4Ode_H5fcolU0tsvrWAlnWf05tPdEAj1KJT0_eHD0puV1jIR-dJC/exec';
+    const cfgOk = APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'PEGA_AQUI_TU_URL_DE_APPS_SCRIPT';
     if(!cfgOk) document.getElementById('cfgBanner').style.display = 'flex';
     initApp();
   } else {
