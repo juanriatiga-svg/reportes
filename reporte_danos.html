@@ -269,7 +269,7 @@ let records = [];
 // BOOT
 // ══════════════════════════════════════════════════
 window.onload = async () => {
-  const configured = APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'PEGA_AQUI_TU_URL_DE_APPS_SCRIPT';
+  const configured = APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbwHgMvlc7j0BdQY4Ode_H5fcolU0tsvrWAlnWf05tPdEAj1KJT0_eHD0puV1jIR-dJC/exec';
   if (!configured) {
     setOverlay(false);
     document.getElementById('loginScreen').style.display = 'flex';
@@ -349,7 +349,7 @@ function doLogin() {
     document.getElementById('app').style.display = 'block';
     document.getElementById('uBadge').textContent = user.role.toUpperCase();
     document.getElementById('uName').textContent  = user.name;
-    const cfgOk = APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'PEGA_AQUI_TU_URL_DE_APPS_SCRIPT';
+    const cfgOk = APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbwHgMvlc7j0BdQY4Ode_H5fcolU0tsvrWAlnWf05tPdEAj1KJT0_eHD0puV1jIR-dJC/exec';
     if(!cfgOk) document.getElementById('cfgBanner').style.display = 'flex';
     initApp();
   } else {
