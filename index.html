@@ -241,7 +241,7 @@ tr:hover td{background:var(--bg3)}
 // ══════════════════════════════════════════════════
 // ⚙️  CONFIGURACIÓN — PEGA AQUÍ TU URL DE GOOGLE
 // ══════════════════════════════════════════════════
-const APPS_SCRIPT_URL = 'PEGA_AQUI_TU_URL_DE_APPS_SCRIPT';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxlUcK7mKiN9I9Su2FMau-LYfIlj5M1QKZgNBfMQLPA_C3mzpiOkt2_xafzAAQDliq4qA/exec';
 // Ejemplo:
 // const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfyc.../exec';
 
@@ -269,7 +269,7 @@ let records = [];
 // BOOT
 // ══════════════════════════════════════════════════
 window.onload = async () => {
-  const configured = APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'PEGA_AQUI_TU_URL_DE_APPS_SCRIPT';
+  const configured = APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbxlUcK7mKiN9I9Su2FMau-LYfIlj5M1QKZgNBfMQLPA_C3mzpiOkt2_xafzAAQDliq4qA/exec';
   if (!configured) {
     setOverlay(false);
     document.getElementById('loginScreen').style.display = 'flex';
@@ -349,7 +349,7 @@ function doLogin() {
     document.getElementById('app').style.display = 'block';
     document.getElementById('uBadge').textContent = user.role.toUpperCase();
     document.getElementById('uName').textContent  = user.name;
-    const cfgOk = APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'PEGA_AQUI_TU_URL_DE_APPS_SCRIPT';
+    const cfgOk = APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbxlUcK7mKiN9I9Su2FMau-LYfIlj5M1QKZgNBfMQLPA_C3mzpiOkt2_xafzAAQDliq4qA/exec';
     if(!cfgOk) document.getElementById('cfgBanner').style.display = 'flex';
     initApp();
   } else {
