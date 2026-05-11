@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MGT — Reporte de Daños Magdalena</title>
+<style>
+:root{--bg:#0f172a;--bg2:#1e293b;--bg3:#273348;--bg4:#1a2840;--cyan:#38bdf8;--cyan2:#0284c7;--green:#22c55e;--yellow:#eab308;--red:#ef4444;--orange:#f97316;--purple:#a855f7;--text:#e2e8f0;--text2:#64748b;--border:#1e3a5f;--card:#0d1b2e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh}
+#overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:2000;flex-direction:column;gap:14px}
+#overlay p{color:var(--text2);font-size:.9rem}
+.spin{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+header{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:6px}
+.logo{font-size:1.1rem;font-weight:700;color:var(--cyan)}.logo small{color:var(--text2);font-weight:400;font-size:.8rem;margin-left:6px}
+.hright{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.fecha-hoy{font-size:.8rem;color:var(--text2)}
+.fecha-hoy b{color:var(--text)}
+#connStatus{display:flex;align-items:center;gap:6px;font-size:.78rem;padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg4)}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-ok{background:var(--green);box-shadow:0 0 6px var(--green)}
+.dot-err{background:var(--red);box-shadow:0 0 6px var(--red)}
+.dot-wait{background:var(--yellow);animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+nav{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;padding:0 20px;overflow-x:auto}
+nav button{background:none;border:none;color:var(--text2);padding:13px 16px;cursor:pointer;font-size:.85rem;border-bottom:2px solid transparent;white-space:nowrap;transition:.15s}
+nav button.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+nav button:hover:not(.active){color:var(--text)}
+main{padding:20px;max-width:1400px;margin:0 auto}
+.tab{display:none}.tab.active{display:block}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:14px;margin-bottom:20px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;border-left:3px solid var(--accent,var(--cyan))}
+.kpi .lbl{font-size:.71rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+.kpi .val{font-size:1.9rem;font-weight:700;color:var(--accent,var(--cyan));margin:5px 0 2px}
+.kpi .sub{font-size:.71rem;color:var(--text2)}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:18px}
+.panel h3{font-size:.8rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+@media(max-width:800px){.grid2{grid-template-columns:1fr}}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.81rem}
+th{background:var(--bg3);color:var(--text2);padding:9px 11px;text-align:left;font-weight:600;font-size:.73rem;text-transform:uppercase;white-space:nowrap}
+td{padding:9px 11px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:hover td{background:var(--bg3)}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.71rem;font-weight:600;white-space:nowrap}
+.bOK{background:#22c55e22;color:var(--green)}.bWARN{background:#eab30822;color:var(--yellow)}
+.bERR{background:#ef444422;color:var(--red)}.bOBS{background:#f9731622;color:var(--orange)}
+.bAB{background:#a855f722;color:var(--purple)}.bINFO{background:#38bdf822;color:var(--cyan)}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.filters select,.filters input[type=text]{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 11px;border-radius:8px;font-size:.82rem;outline:none}
+.filters select:focus,.filters input:focus{border-color:var(--cyan)}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:.76rem;color:var(--text2)}
+.fg input,.fg select,.fg textarea{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:9px 11px;color:var(--text);font-size:.86rem;outline:none;width:100%}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--cyan)}
+.fg textarea{resize:vertical;min-height:72px}
+.fg select option{background:var(--bg3)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:700px){.form-grid{grid-template-columns:1fr}}
+.full{grid-column:1/-1}
+.btn{padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:.86rem;transition:.15s}
+.btn-p{background:var(--cyan2);color:#fff}.btn-p:hover{background:var(--cyan);color:#000}
+.btn-p:disabled{opacity:.5;cursor:not-allowed}
+.btn-d{background:none;border:1px solid var(--red);color:var(--red)}.btn-d:hover{background:#ef444422}
+.btn-s{background:none;border:1px solid var(--border);color:var(--text2)}.btn-s:hover{color:var(--text)}
+#modal{display:none;position:fixed;inset:0;background:#000b;z-index:500;align-items:center;justify-content:center;padding:20px}
+#modal.open{display:flex}
+.mbox{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%;max-width:760px;max-height:90vh;overflow-y:auto}
+.mbox h2{font-size:1rem;color:var(--cyan);margin-bottom:18px}
+.macts{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+#toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-weight:600;font-size:.87rem;z-index:9999;display:none;max-width:320px}
+.toast-ok{background:var(--green);color:#000}
+.toast-err{background:var(--red);color:#fff}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div id="overlay"><div class="spin"></div><p id="overlayMsg">Conectando con Google Sheets...</p></div>
+
+<div id="modal">
+  <div class="mbox">
+    <h2 id="mTitle">✏️ Editar Reporte</h2>
+    <div class="form-grid" id="mForm"></div>
+    <div class="macts">
+      <button class="btn btn-s" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-p" id="saveEditBtn" onclick="saveEdit()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<div id="app" style="display:none">
+  <header>
+    <div class="logo">🔧 MGT <small>Reporte de Daños — Magdalena</small></div>
+    <div class="hright">
+      <div class="fecha-hoy">📅 <b id="fechaHoy"></b></div>
+      <div id="connStatus">
+        <div class="dot dot-wait" id="connDot"></div>
+        <span id="connTxt">Conectando...</span>
+      </div>
+      <button class="btn btn-s" style="padding:4px 12px;font-size:.78rem" onclick="loadData()">🔄 Actualizar</button>
+    </div>
+  </header>
+  <nav>
+    <button class="active" onclick="showTab('dashboard',this)">📊 Dashboard</button>
+    <button onclick="showTab('reportes',this)">📋 Reportes</button>
+    <button onclick="showTab('nuevo',this)">➕ Nuevo Reporte</button>
+  </nav>
+  <main>
+
+    <!-- DASHBOARD -->
+    <div id="tab-dashboard" class="tab active">
+      <div class="kpis" id="kpiRow"></div>
+      <div class="grid2">
+        <div class="panel"><h3>📊 Por tipo de actividad</h3><div id="cTipo"></div></div>
+        <div class="panel"><h3>🏪 Por tienda</h3><div id="cTienda"></div></div>
+      </div>
+      <div class="grid2">
+        <div class="panel"><h3>🔧 Por dependencia</h3><div id="cDep"></div></div>
+        <div class="panel"><h3>🚦 Por estado</h3><div id="cEstado"></div></div>
+      </div>
+      <div class="panel">
+        <h3>🕐 Últimos 10 reportes</h3>
+        <div class="tw"><table><thead><tr><th>#</th><th>Fecha</th><th>Tienda</th><th>Tipo</th><th>Dep.</th><th>Descripción</th><th>Estado</th><th>Técnico(s)</th></tr></thead><tbody id="recentTbl"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- REPORTES -->
+    <div id="tab-reportes" class="tab">
+      <div class="filters">
+        <select id="fTienda" onchange="renderReportes()"><option value="">Todas las tiendas</option></select>
+        <select id="fTipo"   onchange="renderReportes()"><option value="">Todos los tipos</option></select>
+        <select id="fDep"    onchange="renderReportes()"><option value="">Todas las dep.</option></select>
+        <select id="fEstado" onchange="renderReportes()"><option value="">Todos los estados</option></select>
+        <input type="text" id="fBuscar" placeholder="🔍 Buscar..." oninput="renderReportes()" style="min-width:160px">
+        <button class="btn btn-s" onclick="clearFilters()">✕ Limpiar</button>
+      </div>
+      <div style="margin-bottom:12px">
+        <span id="countLbl" style="font-size:.81rem;color:var(--text2)"></span>
+      </div>
+      <div class="panel" style="padding:0">
+        <div class="tw">
+          <table>
+            <thead><tr><th>#</th><th>Fecha</th><th>Tienda</th><th>Tipo</th><th>Dep.</th><th>Equipo</th><th>Descripción</th><th>Repuestos</th><th>Estado</th><th>Técnico(s)</th><th id="actHead">Acciones</th></tr></thead>
+            <tbody id="rTbl"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- NUEVO REPORTE -->
+    <div id="tab-nuevo" class="tab">
+      <div class="panel">
+        <h3>➕ Nuevo Reporte de Actividad</h3>
+        <div class="form-grid">
+          <div class="fg"><label>Tienda *</label><select id="nTienda"><option value="">Seleccionar...</option></select></div>
+          <div class="fg"><label>Tipo de Actividad *</label><select id="nTipo"><option value="">Seleccionar...</option></select></div>
+          <div class="fg"><label>Dependencia *</label><select id="nDep"><option value="">Seleccionar...</option></select></div>
+          <div class="fg"><label>Estado del Servicio *</label><select id="nEstado"><option value="">Seleccionar...</option></select></div>
+          <div class="fg"><label>Nombre del Equipo</label><input type="text" id="nEquipo" placeholder="Ej: Rack de Frío, Condensadora..."></div>
+          <div class="fg"><label>Modelo / Marca</label><input type="text" id="nModelo" placeholder="Ej: Carrier, Copeland..."></div>
+          <div class="fg full"><label>Descripción de la Actividad *</label><textarea id="nDesc" placeholder="Describir detalladamente la actividad realizada..."></textarea></div>
+          <div class="fg">
+            <label>¿Utilizó Repuestos?</label>
+            <select id="nUsoRep" onchange="tog('nRepURow',this.value==='SI')">
+              <option value="NO">NO</option><option value="SI">SÍ</option>
+            </select>
+          </div>
+          <div class="fg" id="nRepURow" style="display:none"><label>¿Cuáles repuestos usó?</label><input type="text" id="nRepU" placeholder="Ej: Motor 10w, Tubos LED T8..."></div>
+          <div class="fg">
+            <label>¿Solicitó Repuestos?</label>
+            <select id="nSolRep" onchange="tog('nRepSRow',this.value==='SI')">
+              <option value="NO">NO</option><option value="SI">SÍ</option>
+            </select>
+          </div>
+          <div class="fg" id="nRepSRow" style="display:none"><label>¿Cuáles repuestos solicitó?</label><input type="text" id="nRepS" placeholder="Ej: Compresor Embraco, Válvula..."></div>
+          <div class="fg full"><label>Observaciones</label><textarea id="nObs" placeholder="Observaciones adicionales..."></textarea></div>
+          <div class="fg full">
+            <label>Técnico(s) responsable(s) *</label>
+            <div id="tecBoxes" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:4px"></div>
+          </div>
+        </div>
+        <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <button class="btn btn-p" id="saveNewBtn" onclick="submitNew()">💾 Guardar Reporte</button>
+          <button class="btn btn-s" onclick="clearNew()">🗑 Limpiar</button>
+          <span id="saveStatus" style="font-size:.81rem;color:var(--text2)"></span>
+        </div>
+        <div id="fErr" style="color:var(--red);font-size:.81rem;margin-top:10px;min-height:18px"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+// CONFIGURACIÓN
+// ══════════════════════════════════════════════════
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxlUcK7mKiN9I9Su2FMau-LYfIlj5M1QKZgNBfMQLPA_C3mzpiOkt2_xafzAAQDliq4qA/exec';
+
+// ══════════════════════════════════════════════════
+// LISTAS
+// ══════════════════════════════════════════════════
+const TIENDAS  = ['MERCADO','CIENAGA','RODADERO','TRANSPORTE','SANTA CRUZ','BAVARIA','CEDi'];
+const TIPOS    = ['CORRECTIVA','MANTENIMIENTO','PREVENTIVA','REVISION','VERIFICACION','SEGUIMIENTO','OTRO'];
+const DEPS     = ['REFRIGERACION','INFRAESTRUCTURA','ELECTROMECANICO','OBRA CIVIL'];
+const ESTADOS  = ['CERRADO','ABIERTO','OBSERVACION'];
+const TECNICOS = ['JOSE GAMARRA','LEONARDO ACOSTA','LEONARDO MENDOZA','ARMANDO MERCADO','JUAN RIATIGA','JOSE TORRIJO','CARLOS MONTILLA','VICTOR COLON'];
+
+let records = [];
+
+// ══════════════════════════════════════════════════
+// FECHA ACTUAL
+// ══════════════════════════════════════════════════
+function setFecha() {
+  const d = new Date();
+  const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  document.getElementById('fechaHoy').textContent =
+    `${dias[d.getDay()]}, ${d.getDate()} ${meses[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+// ══════════════════════════════════════════════════
+// ESTADO DE CONEXIÓN
+// ══════════════════════════════════════════════════
+function setConn(status, msg) {
+  const dot = document.getElementById('connDot');
+  const txt = document.getElementById('connTxt');
+  dot.className = 'dot ' + (status==='ok' ? 'dot-ok' : status==='err' ? 'dot-err' : 'dot-wait');
+  txt.textContent = msg;
+}
+
+// ══════════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════════
+window.onload = async () => {
+  setFecha();
+  document.getElementById('app').style.display = 'block';
+  setConn('wait', 'Conectando...');
+  await loadData(false);
+  document.getElementById('overlay').style.display = 'none';
+  populateSelects();
+  buildTecBoxes();
+  renderDashboard();
+  renderReportes();
+};
+
+// ══════════════════════════════════════════════════
+// API
+// ══════════════════════════════════════════════════
+async function api(action, body={}) {
+  const res = await fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action, ...body }),
+    headers: { 'Content-Type': 'text/plain' }
+  });
+  const text = await res.text();
+  try { return JSON.parse(text); }
+  catch { throw new Error('Respuesta inválida del servidor'); }
+}
+
+async function loadData(silent=true) {
+  setConn('wait', 'Actualizando...');
+  try {
+    const result = await api('getAll');
+    if(result.error) throw new Error(result.error);
+    records = (result.records || []).map(r => ({
+      id:     r.ID,     fi:     r.FECHA,   tienda: r.TIENDA,
+      tipo:   r.TIPO,   dep:    r.DEPENDENCIA, equipo: r.EQUIPO,
+      modelo: r.MODELO, desc:   r.DESCRIPCION,
+      usoRep: r.USO_REPUESTOS,  repU:   r.REPUESTOS_USADOS,
+      solRep: r.SOLICITO_REPUESTOS, repS: r.REPUESTOS_SOLICITADOS,
+      obs:    r.OBSERVACIONES,  tecs:   r.TECNICOS,  estado: r.ESTADO
+    }));
+    const now = new Date();
+    const h = now.getHours(), m = String(now.getMinutes()).padStart(2,'0');
+    setConn('ok', `Conectado · ${h}:${m}`);
+    if(!silent){ renderDashboard(); renderReportes(); }
+  } catch(e) {
+    setConn('err', 'Sin conexión');
+    if(!silent) toast('❌ Error: ' + e.message, true);
+  }
+}
+
+// ══════════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════════
+function showTab(id, btn) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='dashboard') renderDashboard();
+  if(id==='reportes')  renderReportes();
+  if(id==='nuevo')     clearNew();
+}
+
+function populateSelects() {
+  const map = { fTienda:TIENDAS, fTipo:TIPOS, fDep:DEPS, fEstado:ESTADOS, nTienda:TIENDAS, nTipo:TIPOS, nDep:DEPS, nEstado:ESTADOS };
+  Object.entries(map).forEach(([id, opts]) => {
+    const el = document.getElementById(id); if(!el) return;
+    const cur = el.value;
+    while(el.options.length > 1) el.remove(1);
+    opts.forEach(v => el.add(new Option(v, v)));
+    el.value = cur;
+  });
+}
+
+function buildTecBoxes(sel=[]) {
+  const el = document.getElementById('tecBoxes'); el.innerHTML = '';
+  TECNICOS.forEach(t => {
+    el.innerHTML += `<label style="display:flex;align-items:center;gap:6px;cursor:pointer;background:var(--bg3);padding:6px 12px;border-radius:7px;border:1px solid var(--border);font-size:.82rem">
+      <input type="checkbox" value="${t}" ${sel.includes(t)?'checked':''} style="accent-color:var(--cyan)">
+      ${t.split(' ').map(w=>w[0]+w.slice(1).toLowerCase()).join(' ')}
+    </label>`;
+  });
+}
+
+// ══════════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════════
+function renderDashboard() {
+  const all  = records;
+  const cerr = all.filter(r=>r.estado==='CERRADO').length;
+  const ab   = all.filter(r=>r.estado==='ABIERTO').length;
+  const obs  = all.filter(r=>r.estado==='OBSERVACION').length;
+  document.getElementById('kpiRow').innerHTML = `
+    <div class="kpi" style="--accent:var(--cyan)"><div class="lbl">Total Reportes</div><div class="val">${all.length}</div><div class="sub">en el sistema</div></div>
+    <div class="kpi" style="--accent:var(--green)"><div class="lbl">Cerrados</div><div class="val">${cerr}</div><div class="sub">${pct(cerr,all.length)}% del total</div></div>
+    <div class="kpi" style="--accent:var(--purple)"><div class="lbl">Abiertos</div><div class="val">${ab}</div><div class="sub">pendientes</div></div>
+    <div class="kpi" style="--accent:var(--orange)"><div class="lbl">En Observación</div><div class="val">${obs}</div><div class="sub">en seguimiento</div></div>
+    <div class="kpi" style="--accent:var(--yellow)"><div class="lbl">Con Repuestos</div><div class="val">${all.filter(r=>r.usoRep==='SI').length}</div><div class="sub">usaron repuestos</div></div>
+    <div class="kpi" style="--accent:var(--red)"><div class="lbl">Rep. Solicitados</div><div class="val">${all.filter(r=>r.solRep==='SI').length}</div><div class="sub">pendientes entrega</div></div>`;
+  bar('cTipo',   countBy(all,'tipo'),   TIPOS);
+  bar('cTienda', countBy(all,'tienda'), TIENDAS);
+  bar('cDep',    countBy(all,'dep'),    DEPS);
+  bar('cEstado', countBy(all,'estado'), ESTADOS);
+  const tb = document.getElementById('recentTbl'); tb.innerHTML='';
+  [...all].reverse().slice(0,10).forEach(r=>{
+    tb.innerHTML += `<tr>
+      <td><b style="color:var(--cyan)">${r.id}</b></td>
+      <td style="white-space:nowrap">${r.fi}</td>
+      <td><b>${r.tienda}</b></td>
+      <td><span class="badge bINFO">${r.tipo}</span></td>
+      <td>${r.dep||'—'}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.desc}">${r.desc}</td>
+      <td>${stBadge(r.estado)}</td>
+      <td>${fmtTec(r.tecs)}</td></tr>`;
+  });
+}
+
+function bar(elId, obj, order) {
+  const el = document.getElementById(elId); el.innerHTML='';
+  const max = Math.max(...Object.values(obj), 1);
+  (order||Object.keys(obj)).forEach(k=>{
+    const v = obj[k]||0; if(!v) return;
+    el.innerHTML += `<div style="display:flex;align-items:center;gap:8px;font-size:.78rem;margin-bottom:5px">
+      <span style="width:120px;text-align:right;color:var(--text2);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${k}">${k}</span>
+      <div style="flex:1;background:var(--bg3);border-radius:4px;height:13px">
+        <div style="width:${Math.round(v/max*100)}%;background:var(--cyan2);height:13px;border-radius:4px"></div>
+      </div>
+      <span style="color:var(--cyan);font-weight:700;width:26px;text-align:right">${v}</span>
+    </div>`;
+  });
+}
+
+function pct(a,b){ return b ? Math.round(a/b*100) : 0; }
+function countBy(arr,k){ const c={}; arr.forEach(r=>{ const v=r[k]||'Sin info'; c[v]=(c[v]||0)+1 }); return c; }
+
+// ══════════════════════════════════════════════════
+// REPORTES
+// ══════════════════════════════════════════════════
+function filteredRecords() {
+  let arr = [...records];
+  const fT = document.getElementById('fTienda')?.value;
+  const fTi= document.getElementById('fTipo')?.value;
+  const fD = document.getElementById('fDep')?.value;
+  const fE = document.getElementById('fEstado')?.value;
+  const fB = document.getElementById('fBuscar')?.value.toLowerCase();
+  if(fT)  arr = arr.filter(r=>r.tienda===fT);
+  if(fTi) arr = arr.filter(r=>r.tipo===fTi);
+  if(fD)  arr = arr.filter(r=>r.dep===fD);
+  if(fE)  arr = arr.filter(r=>r.estado===fE);
+  if(fB)  arr = arr.filter(r=>JSON.stringify(r).toLowerCase().includes(fB));
+  return arr;
+}
+
+function renderReportes() {
+  const arr = filteredRecords();
+  document.getElementById('countLbl').textContent = `${arr.length} registro(s)`;
+  const tb = document.getElementById('rTbl'); tb.innerHTML='';
+  arr.forEach(r => {
+    const repStr = r.usoRep==='SI'
+      ? `<span class="badge bWARN">SÍ: ${r.repU||''}</span>`
+      : `<span class="badge" style="background:#ffffff10;color:var(--text2)">NO</span>`;
+    const solStr = r.solRep==='SI'
+      ? `<br><span class="badge bERR" style="margin-top:3px">🔴 ${r.repS||''}</span>` : '';
+    tb.innerHTML += `<tr>
+      <td><b style="color:var(--cyan)">${r.id}</b></td>
+      <td style="white-space:nowrap">${r.fi}</td>
+      <td><b>${r.tienda}</b></td>
+      <td><span class="badge bINFO">${r.tipo}</span></td>
+      <td style="font-size:.77rem;color:var(--text2)">${r.dep||'—'}</td>
+      <td style="font-size:.79rem">${r.equipo||'—'}</td>
+      <td style="max-width:220px;font-size:.78rem;line-height:1.4">${r.desc}</td>
+      <td style="font-size:.78rem">${repStr}${solStr}</td>
+      <td>${stBadge(r.estado)}</td>
+      <td style="font-size:.77rem">${fmtTec(r.tecs)}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-s" style="padding:3px 8px;font-size:.73rem" onclick="openEdit('${r.id}')">✏️</button>
+        <button class="btn btn-d" style="padding:3px 8px;font-size:.73rem;margin-left:3px" onclick="deleteRec('${r.id}')">🗑</button>
+      </td>
+    </tr>`;
+  });
+}
+
+function clearFilters() {
+  ['fTienda','fTipo','fDep','fEstado'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fBuscar').value='';
+  renderReportes();
+}
+
+function stBadge(e){ const m={CERRADO:'bOK',ABIERTO:'bAB',OBSERVACION:'bOBS'}; return `<span class="badge ${m[e]||'bINFO'}">${e||'—'}</span>`; }
+function fmtTec(t){ if(!t) return '—'; return t.split(';').filter(Boolean).map(s=>`<span style="font-size:.73rem;background:var(--bg3);padding:2px 7px;border-radius:8px;display:inline-block;margin:1px">${s.trim().split(' ')[0]}</span>`).join(' '); }
+
+// ══════════════════════════════════════════════════
+// NUEVO REPORTE
+// ══════════════════════════════════════════════════
+async function submitNew() {
+  const err = document.getElementById('fErr');
+  const tienda = document.getElementById('nTienda').value;
+  const tipo   = document.getElementById('nTipo').value;
+  const dep    = document.getElementById('nDep').value;
+  const estado = document.getElementById('nEstado').value;
+  const desc   = document.getElementById('nDesc').value.trim();
+  const tecs   = [...document.querySelectorAll('#tecBoxes input:checked')].map(c=>c.value);
+  if(!tienda||!tipo||!dep||!estado||!desc){ err.textContent='Completa los campos obligatorios (*)'; return; }
+  if(!tecs.length){ err.textContent='Selecciona al menos un técnico'; return; }
+  err.textContent='';
+  const btn = document.getElementById('saveNewBtn');
+  btn.disabled = true;
+  document.getElementById('saveStatus').textContent = '⏳ Guardando...';
+  const now = new Date();
+  const fi = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const rec = {
+    FECHA: fi, TIENDA: tienda, TIPO: tipo, DEPENDENCIA: dep, ESTADO: estado,
+    EQUIPO:   document.getElementById('nEquipo').value,
+    MODELO:   document.getElementById('nModelo').value,
+    DESCRIPCION:           desc,
+    USO_REPUESTOS:         document.getElementById('nUsoRep').value,
+    REPUESTOS_USADOS:      document.getElementById('nRepU').value,
+    SOLICITO_REPUESTOS:    document.getElementById('nSolRep').value,
+    REPUESTOS_SOLICITADOS: document.getElementById('nRepS').value,
+    OBSERVACIONES:         document.getElementById('nObs').value,
+    TECNICOS:              tecs.join(';')
+  };
+  try {
+    const res = await api('add', { record: rec });
+    if(res.error) throw new Error(res.error);
+    toast('✅ Reporte guardado en Google Sheets');
+    clearNew();
+    await loadData(false);
+    showTab('reportes', document.querySelectorAll('nav button')[1]);
+  } catch(e) {
+    toast('❌ Error al guardar: ' + e.message, true);
+  }
+  btn.disabled = false;
+  document.getElementById('saveStatus').textContent = '';
+}
+
+function clearNew() {
+  ['nTienda','nTipo','nDep','nEstado','nUsoRep','nSolRep'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['nEquipo','nModelo','nDesc','nObs','nRepU','nRepS'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  tog('nRepURow', false); tog('nRepSRow', false);
+  document.getElementById('fErr').textContent='';
+  buildTecBoxes();
+}
+
+function tog(id, show) { document.getElementById(id).style.display = show ? 'flex' : 'none'; }
+
+// ══════════════════════════════════════════════════
+// EDITAR / ELIMINAR
+// ══════════════════════════════════════════════════
+let editId = null;
+
+function openEdit(id) {
+  const r = records.find(x=>String(x.id)===String(id)); if(!r) return;
+  editId = id;
+  document.getElementById('mTitle').textContent = `✏️ Editar Reporte #${id}`;
+  document.getElementById('mForm').innerHTML = `
+    <div class="fg"><label>Tienda</label>${ms('eTienda',TIENDAS,r.tienda)}</div>
+    <div class="fg"><label>Tipo Actividad</label>${ms('eTipo',TIPOS,r.tipo)}</div>
+    <div class="fg"><label>Dependencia</label>${ms('eDep',DEPS,r.dep)}</div>
+    <div class="fg"><label>Estado</label>${ms('eEstado',ESTADOS,r.estado)}</div>
+    <div class="fg"><label>Equipo</label><input id="eEquipo" value="${xe(r.equipo)}"></div>
+    <div class="fg"><label>Modelo</label><input id="eModelo" value="${xe(r.modelo)}"></div>
+    <div class="fg"><label>Usó repuestos</label>${ms('eUsoRep',['NO','SI'],r.usoRep,'onchange="document.getElementById(\'eRepURow\').style.display=this.value===\'SI\'?\'flex\':\'none\'"')}</div>
+    <div class="fg" id="eRepURow" style="display:${r.usoRep==='SI'?'flex':'none'};flex-direction:column;gap:5px"><label>Repuestos usados</label><input id="eRepU" value="${xe(r.repU)}"></div>
+    <div class="fg"><label>Solicitó repuestos</label>${ms('eSolRep',['NO','SI'],r.solRep,'onchange="document.getElementById(\'eRepSRow\').style.display=this.value===\'SI\'?\'flex\':\'none\'"')}</div>
+    <div class="fg" id="eRepSRow" style="display:${r.solRep==='SI'?'flex':'none'};flex-direction:column;gap:5px"><label>Repuestos solicitados</label><input id="eRepS" value="${xe(r.repS)}"></div>
+    <div class="fg full"><label>Descripción</label><textarea id="eDesc">${xe(r.desc)}</textarea></div>
+    <div class="fg full"><label>Observaciones</label><textarea id="eObs">${xe(r.obs)}</textarea></div>
+    <div class="fg full"><label>Técnico(s)</label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        ${TECNICOS.map(t=>`<label style="display:flex;align-items:center;gap:5px;cursor:pointer;background:var(--bg3);padding:5px 10px;border-radius:7px;border:1px solid var(--border);font-size:.79rem">
+          <input type="checkbox" class="etec" value="${t}" ${(r.tecs||'').includes(t)?'checked':''} style="accent-color:var(--cyan)"> ${t}
+        </label>`).join('')}
+      </div>
+    </div>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+async function saveEdit() {
+  if(!editId) return;
+  const r = records.find(x=>String(x.id)===String(editId)); if(!r) return;
+  const btn = document.getElementById('saveEditBtn');
+  btn.disabled=true; btn.textContent='⏳ Guardando...';
+  const tecs = [...document.querySelectorAll('.etec:checked')].map(c=>c.value).join(';');
+  const updated = {
+    ID: editId, FECHA: r.fi,
+    TIENDA:      document.getElementById('eTienda').value,
+    TIPO:        document.getElementById('eTipo').value,
+    DEPENDENCIA: document.getElementById('eDep').value,
+    ESTADO:      document.getElementById('eEstado').value,
+    EQUIPO:      document.getElementById('eEquipo').value,
+    MODELO:      document.getElementById('eModelo').value,
+    USO_REPUESTOS:         document.getElementById('eUsoRep').value,
+    REPUESTOS_USADOS:      document.getElementById('eRepU')?.value||'',
+    SOLICITO_REPUESTOS:    document.getElementById('eSolRep').value,
+    REPUESTOS_SOLICITADOS: document.getElementById('eRepS')?.value||'',
+    DESCRIPCION:   document.getElementById('eDesc').value,
+    OBSERVACIONES: document.getElementById('eObs').value,
+    TECNICOS: tecs
+  };
+  try {
+    const res = await api('edit', { record: updated });
+    if(res.error) throw new Error(res.error);
+    toast('✅ Registro actualizado en Google Sheets');
+    closeModal();
+    await loadData(false);
+  } catch(e) {
+    toast('❌ Error: ' + e.message, true);
+  }
+  btn.disabled=false; btn.textContent='💾 Guardar';
+}
+
+function closeModal(){ document.getElementById('modal').classList.remove('open'); editId=null; }
+document.getElementById('modal').addEventListener('click', e=>{ if(e.target===document.getElementById('modal')) closeModal(); });
+
+async function deleteRec(id) {
+  if(!confirm(`¿Eliminar reporte #${id}? Esta acción no se puede deshacer.`)) return;
+  try {
+    const res = await api('delete', { id });
+    if(res.error) throw new Error(res.error);
+    toast('🗑 Registro eliminado');
+    await loadData(false);
+  } catch(e) {
+    toast('❌ Error: ' + e.message, true);
+  }
+}
+
+// ══════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════
+function ms(id, opts, val, extra='') {
+  return `<select id="${id}" ${extra}>${opts.map(o=>`<option value="${o}"${o===val?' selected':''}>${o}</option>`).join('')}</select>`;
+}
+function xe(s){ return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function toast(msg, isErr=false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = isErr ? 'toast-err' : 'toast-ok';
+  el.style.display = 'block';
+  setTimeout(()=>{ el.style.display='none'; }, 3500);
+}
+</script>
+</body>
+</html>
